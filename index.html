@@ -8,7 +8,9 @@
 <!--
   ────────────────────────────────────────────────────────────────
   FILE: index.html  (cecespieces — public website)
-  LAST UPDATED: 2026-10-23_0010 UTC
+  LAST UPDATED: 2026-11-11_2240 UTC
+  CHANGE: 2026-11-11_2240 — Donations on every page: a small "Support Cece" band (Donate, and Become a
+          sponsor when packages are set) at the bottom of every page, from the hub's Donations & Sponsors.
   CHANGE: 2026-10-21_1830 — Gallery Walk splash: a cinematic, letterboxed
           entry where visitors walk a dark, spot-lit museum corridor past ten
           framed pieces (brass placards, gilded doors, film grain, auto-tour)
@@ -562,6 +564,14 @@ body.sms-on .sms-opt{display:flex}
 .modal-box{background:rgba(255,255,255,.65);border:1px solid var(--pink-border2);max-width:560px;width:100%;max-height:92vh;overflow-y:auto;padding:44px;position:relative;transform:translateY(14px);transition:transform .4s cubic-bezier(.34,1.56,.64,1);border-radius:6px;box-shadow:0 24px 60px rgba(139,63,255,.18)}
 .modal-bg.open .modal-box{transform:translateY(0)}
 /* Support (donate / sponsor) — added 2026-10-22_2245 UTC */
+.sup-band{max-width:1100px;margin:36px auto 8px;padding:22px 26px;border-radius:14px;background:linear-gradient(135deg,rgba(124,92,191,.08),rgba(201,154,63,.08));border:1px solid var(--border2);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px}
+.sup-band h3{font-family:'Playfair Display',serif;font-weight:400;font-size:1.25rem;margin:0 0 4px;color:var(--ink2)}
+.sup-band p{margin:0;font-size:.82rem;color:var(--muted);line-height:1.6;max-width:560px}
+.sup-band .sb-btns{display:flex;gap:8px;flex-wrap:wrap}
+.sup-band button{font-family:inherit;font-size:.78rem;letter-spacing:.04em;padding:10px 18px;border-radius:30px;cursor:pointer;border:1.5px solid var(--purple2)}
+.sup-band .sb-donate{background:var(--purple2);color:#fff}
+.sup-band .sb-sponsor{background:transparent;color:var(--purple2)}
+@media(max-width:600px){.sup-band{margin:28px 16px 8px;padding:18px}}
 .support-fab{position:fixed;left:22px;bottom:22px;z-index:90;font-family:'Jost',sans-serif;font-size:.74rem;letter-spacing:.06em;padding:11px 18px;border-radius:30px;border:none;cursor:pointer;color:#fff;background:linear-gradient(135deg,var(--purple2),var(--pink2));box-shadow:0 6px 22px rgba(124,92,191,.35);transition:transform .2s}
 .support-fab:hover{transform:translateY(-2px)}
 .sup-tabs{display:flex;gap:6px;margin:6px 0 18px}
@@ -3383,6 +3393,20 @@ async function loadSupport(){
   }catch(e){}
   const on=STRIPE_CHECKOUT_URL && (supDonateOn()||supSponsorOn());
   document.querySelectorAll('.sup-link').forEach(el=>el.style.display=on?'':'none');
+  supBands(on);
+}
+// A Donate / Sponsor band at the bottom of every page (2026-11-11_2240 UTC).
+function supBands(on){
+  document.querySelectorAll('.sup-band').forEach(el=>el.remove());
+  if(!on) return;
+  const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const d=supCfg.donate||{}, sp=supCfg.sponsor||{};
+  const html=`<div><h3>${esc(supDonateOn()?(d.title||"Support Cece's art"):(sp.title||'Become a Sponsor'))}</h3><p>${esc(supDonateOn()?(d.text||''):(sp.intro||''))}</p></div>`+
+    `<div class="sb-btns">${supDonateOn()?'<button class="sb-donate" onclick="openSupport(\'donate\')">♡ Donate</button>':''}${supSponsorOn()?'<button class="sb-sponsor" onclick="openSupport(\'sponsor\')">✦ Become a sponsor</button>':''}</div>`;
+  document.querySelectorAll('.page').forEach(pg=>{
+    if(pg.id==='page-classroom') return; // students' lesson page stays focused
+    const b=document.createElement('div'); b.className='sup-band'; b.innerHTML=html; pg.appendChild(b);
+  });
 }
 function openSupport(mode){
   const dOn=supDonateOn(), sOn=supSponsorOn();
